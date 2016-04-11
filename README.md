@@ -1,6 +1,6 @@
 # Opportunity Scores for Rookie WRs
 
-Included in this branch are the [R code](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/OS_2016.R), the [plot](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/qb_rec_adp_2016_2.png) of every teams' QB/Receiver relationship, and the [bar chart](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/rook_wr_os_2016_3.png) of opportunity scores (or difference between data point and estimate) for every team.
+Included in this repo are the [R code](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/OS_2016.R), the [plot](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/qb_rec_adp_2016_2.png) of every teams' QB/Receiver relationship, and the [bar chart](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/rook_wr_os_2016_3.png) of opportunity scores (or difference between data point and estimate) for every team.
 
 This an analysis uses current [MyFantasyLeague MFL10](http://www54.myfantasyleague.com/2016/public#0) ADP to determine which teams have the most opportunity for rookie wide receivers. 
 
