@@ -239,7 +239,7 @@ qb_rec_plot <- ggplot(team_16, aes(QB_Avg, Adj_value, label = team))
 qb_rec_plot + #geom_point(data = team, color = "darkblue", alpha = 0.15) + 
     geom_point(color = "blue3", alpha = 1) + 
     geom_smooth(color = "blue3", linetype = 4, method = lm) + 
-    fte_theme() + labs(x="Quarterback ADP", 
+    labs(x="Quarterback ADP", 
                        y="Combined Receiver Value (Based on ADP)",
                        title="QB/Receiver ADP Relationship (2016)") +
     geom_text(data = names2, size = 4.5, hjust = -0.15, angle = 45) +
@@ -263,8 +263,7 @@ os_16_plot <- ggplot(team_16, aes(team, os))
 os_16_plot + geom_bar(aes(x=team2), stat = "identity", fill = "blue3") + 
     labs(x=NULL, y=NULL, title="Rookie Wide Receiver Opportunity Scores (Pre-Draft 2016)") + 
     scale_x_discrete(breaks=NULL) + 
-    geom_text(aes(label=team2), size = 3.4, vjust = ifelse(team_16$os >= 0, -0.3, 1.3)) +
-    fte_theme()
+    geom_text(aes(label=team2), size = 3.4, vjust = ifelse(team_16$os >= 0, -0.3, 1.3))
 
 ggsave("rook_wr_os_2016_3.png")
 
