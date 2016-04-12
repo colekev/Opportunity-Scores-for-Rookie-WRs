@@ -83,35 +83,35 @@ adj$team <- adj$team %>%
 adp_ranks <- read_csv("adp_ranks_2015.csv")
 
 qb_wr_te <- adp_ranks %>% 
-            filter(year %in% 2011:2015, Pos %in% c("QB", "WR", "TE")) %>% 
-            arrange(desc(year), Team, Avg_Pick)
+            filter(year %in% 2011:2015, pos %in% c("QB", "WR", "TE")) %>% 
+            arrange(desc(year), team, avg_pick)
 
 #Separate by qb and receivers
-qb <- filter(qb_wr_te, Pos == "QB", Team != "FA")
+qb <- filter(qb_wr_te, pos == "QB", team != "FA")
 
-wr_te <- filter(qb_wr_te, Pos == "WR" | Pos == "TE", Team != "FA", Avg_Pick <= 240)
+wr_te <- filter(qb_wr_te, pos %in% c("WR", "TE"), team != "FA", avg_pick <= 240)
 
 #Rank QBs in order to only use ADP data for No.1 QB on each team
 qb <- qb %>% 
-    group_by(year, Team) %>%
-    mutate(Rank = rank(Avg_Pick)) %>%
-    filter(Rank == 1) %>% 
-    group_by(Team, year) %>% 
-    summarise(QB_Avg = mean(Avg_Pick))
+    group_by(year, team) %>%
+    mutate(rank = rank(avg_pick)) %>%
+    filter(rank == 1) %>% 
+    group_by(team, year) %>% 
+    summarise(qb_avg = mean(avg_pick))
 
 #Calculate receiver value by subtracting WR & TE ADPs from 240, 
 # then sum by team and year
 
 wr_te <- wr_te %>% 
-    mutate(Value = 240 - Avg_Pick) %>% 
-    group_by(Team, year) %>% 
-    summarise(Value = sum(Value))
+    mutate(value = 240 - avg_pick) %>% 
+    group_by(team, year) %>% 
+    summarise(value = sum(value))
 
-team <- left_join(qb, wr_te, by = c("year", "Team")) %>%
-    setnames("Team", "team") %>%
+team <- left_join(qb, wr_te, by = c("year", "team")) %>%
+    setnames("team", "team") %>%
     left_join(adj, by = c("year", "team")) %>%
     ungroup() %>%
-    mutate(Adj_value = (Value/(1 - perrb))/(1 - qbruper))
+    mutate(adj_value = (value/(1 - perrb))/(1 - qbruper))
 
 #ADP data from the Best Ball ADP App (change name to most recent file)
 total_draft <- read_csv("~/Downloads/best_ball_adp_rotoviz (43).csv")
@@ -123,34 +123,34 @@ total_draft$NAME <- (str_replace_all(total_draft$NAME, fixed("*"), ""))
 
 x <- strsplit(total_draft$NAME, ", ")
 x <- do.call(rbind, x)
-colnames(x) <- c("Last", "First")
+colnames(x) <- c("last", "first")
 total_draft <- cbind(total_draft, x)
 
-total_draft$First <- as.character(total_draft$First)
+total_draft$first <- as.character(total_draft$first)
 
-total_draft$Pos <- str_sub(total_draft$First, -3, -1)
+total_draft$pos <- str_sub(total_draft$first, -3, -1)
 
-str_sub(total_draft$First, -3, -1) <- ""
+str_sub(total_draft$first, -3, -1) <- ""
 
-total_draft$First <- str_trim(total_draft$First, side = "both")
+total_draft$first <- str_trim(total_draft$first, side = "both")
 
-total_draft$Team <- str_sub(total_draft$First, -3, -1)
+total_draft$team <- str_sub(total_draft$first, -3, -1)
 
-str_sub(total_draft$First, -3, -1) <- ""
+str_sub(total_draft$first, -3, -1) <- ""
 
-total_draft$First <- str_trim(total_draft$First, side = "both")
+total_draft$first <- str_trim(total_draft$first, side = "both")
 
-total_draft$Pos <- str_trim(total_draft$Pos, side = "both")
+total_draft$pos <- str_trim(total_draft$pos, side = "both")
 
-total_draft$Team <- str_trim(total_draft$Team, side = "both")
+total_draft$team <- str_trim(total_draft$team, side = "both")
 
 ## Combining First & Last Name
-total_draft$Name <- paste(total_draft$First, total_draft$Last, sep=" ")
+total_draft$name <- paste(total_draft$first, total_draft$last, sep=" ")
 
 adp_2016 <- total_draft %>%  
-    group_by(Team, Name, Pos, ADP) %>% 
-    summarise(Avg_Pick = mean(ADP)) %>% 
-    arrange(Team, Avg_Pick) %>%
+    group_by(team, name, pos, ADP) %>% 
+    summarise(avg_pick = mean(ADP)) %>% 
+    arrange(team, avg_pick) %>%
     ungroup()
 
 ## Adding ADPs for teams without a drafted QB (2016 no ADP for CLE, RAM, DEN)
@@ -160,48 +160,42 @@ adp_2016[243,] <- c("RAM", "STL QB", "QB", 240, 240)
 adp_2016[244,] <- c("DEN", "DEN QB", "QB", 240, 240)
 
 adp_2016$ADP <- as.numeric(adp_2016$ADP)
-adp_2016$Avg_Pick <- as.numeric(adp_2016$Avg_Pick)
+adp_2016$avg_pick <- as.numeric(adp_2016$avg_pick)
 
 # Separate 2016 ADP for QB and receivers
 
 qb_wr_te <- adp_2016 %>% 
-    filter(Pos %in% c("QB", "WR", "TE")) %>% 
-    arrange(Team, Avg_Pick)
+    filter(pos %in% c("QB", "WR", "TE")) %>% 
+    arrange(team, avg_pick)
 
-qb <- filter(qb_wr_te, Pos == "QB")
+qb <- filter(qb_wr_te, pos == "QB")
 
 #Set Drafted minimum filter to screen out infrequently drafted WRs & TEs
 wr_te <- qb_wr_te %>%
-    filter(Pos %in% c("WR","TE"), Team != "FA", Avg_Pick <= 240) %>% 
+    filter(pos %in% c("WR","TE"), team != "FA", avg_pick <= 240) %>% 
     # Cut TE weighting in 1/3 versus WR
-    mutate(Value = ifelse(Pos == "WR", 240 - Avg_Pick, (240 - Avg_Pick)/3))
+    mutate(value = ifelse(pos == "WR", 240 - avg_pick, (240 - avg_pick)/3))
 
 #Rank QB to only use top QB per team
 qb <- qb %>% 
-    group_by(Team) %>% 
-    mutate(Rank = rank(Avg_Pick, ties.method = "first"))
+    group_by(team) %>% 
+    mutate(rank = rank(avg_pick, ties.method = "first"))
 
 # Total receiver ADP values combined
 wr_te <- wr_te %>% 
-    group_by(Team) %>% 
-    summarise(Value = sum(Value))
+    group_by(team) %>% 
+    summarise(value = sum(value))
 
 # ADP for QB
 qb <- qb %>% 
-    filter(Rank == 1) %>% 
-    group_by(Team, Name) %>% 
-    summarise(QB_Avg = mean(Avg_Pick))
-
-# Get rid of FA teams
-wr_te <- wr_te %>% 
-    filter(Team != "FA")
+    filter(rank == 1) %>% 
+    group_by(team, name) %>% 
+    summarise(qb_avg = mean(avg_pick))
 
 # Combine QB and receiver ADPs
-team_16 <- left_join(qb, wr_te, by = "Team")
+team_16 <- left_join(qb, wr_te, by = "team")
 
 team_16$year <- 2016
-
-setnames(team_16, "Team", "team")
 
 adj$team <- str_replace_all(adj$team, fixed("STL"), "RAM")
 
@@ -210,7 +204,7 @@ team_16 <- left_join(team_16, adj, by = c("year", "team"))
 
 #Gross up receiver value calculation to account for previous year's QB rushing & passing to RBs
 team_16 <- team_16 %>% 
-    mutate(Adj_value = (Value/(1 - perrb))/(1 - qbruper))
+    mutate(adj_value = (value/(1 - perrb))/(1 - qbruper))
 
 # Change names back
 
@@ -223,38 +217,26 @@ team_16$team <- team_16$team %>%
     str_replace_all(fixed("SFO"), "SF") %>% 
     str_replace_all(fixed("TBB"), "TB")
 
-#Use to highlight particular names if necessary
-#names <- filter(team_16, team %in% c("RAM", "NO", "JAC", "SD", "ATL", "BAL", "WAS", "DAL",
-#                                     "OAK", "SEA", "IND", "SF", "MIN", "NYG", "DEN", "HOU",
-#                                     "KC"))
-#names2 <- filter(team_16, team != "NO", team != "JAC", team != "RAM", 
-#                 team != "SD", team !="ATL", team !="BAL",  team != "WAS",
-#                 team != "OAK", team != "DAL", team != "IND", 
-#                 team != "SEA", team!= "SF", team != "MIN", team != "NYG", 
-#                 team != "DEN", team != "KC", team != "HOU")
-
 # Graph QB/Receiver relationship with trendline
-qb_rec_plot <- ggplot(team_16, aes(QB_Avg, Adj_value, label = team))
+qb_rec_plot <- ggplot(team_16, aes(qb_avg, adj_value, label = team))
 
-qb_rec_plot + #geom_point(data = team, color = "darkblue", alpha = 0.15) + 
+qb_rec_plot +  
     geom_point(color = "blue3", alpha = 1) + 
     geom_smooth(color = "blue3", linetype = 4, method = lm) + 
-    labs(x="Quarterback ADP", 
+    fte_theme() + labs(x="Quarterback ADP", 
                        y="Combined Receiver Value (Based on ADP)",
                        title="QB/Receiver ADP Relationship (2016)") +
-    geom_text(data = names2, size = 4.5, hjust = -0.15, angle = 45) +
-    geom_text(data = names, size = 4.5, hjust = 1.1, angle = 45) +
-    #geom_text(data = names3, size = 4.5, hjust = 1.1, vjust = 1.5, angle = 45) +
+    geom_text(size = 4, hjust = -0.15, angle = 45) +
     coord_cartesian(ylim = c(0,1050))
 
-ggsave("qb_rec_adp_2016_2.png")
+ggsave("qb_rec_adp_2016.png")
 
 #Linear regression & opportunity score calculations
-lm_team_16 <- lm(Adj_value ~ QB_Avg, data = team_16)
+lm_team_16 <- lm(adj_value ~ qb_avg, data = team_16)
 
 team_16$est<-predict(lm_team_16,newdata=team_16)
 
-team_16 <- mutate(team_16, os = est - Adj_value)
+team_16 <- mutate(team_16, os = est - adj_value)
 
 #Reorder team names by opportunity score for graph
 team_16$team2 <- reorder(team_16$team, desc(team_16$os))
@@ -263,7 +245,8 @@ os_16_plot <- ggplot(team_16, aes(team, os))
 os_16_plot + geom_bar(aes(x=team2), stat = "identity", fill = "blue3") + 
     labs(x=NULL, y=NULL, title="Rookie Wide Receiver Opportunity Scores (Pre-Draft 2016)") + 
     scale_x_discrete(breaks=NULL) + 
-    geom_text(aes(label=team2), size = 3.4, vjust = ifelse(team_16$os >= 0, -0.3, 1.3))
+    geom_text(aes(label=team2), size = 3.4, vjust = ifelse(team_16$os >= 0, -0.3, 1.3)) +
+    fte_theme()
 
 ggsave("rook_wr_os_2016_3.png")
 
