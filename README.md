@@ -6,6 +6,8 @@ This an analysis uses current [MyFantasyLeague MFL10](http://www54.myfantasyleag
 
 The [wide receiver analysis](http://rotoviz.com/2016/03/rookie-wide-receivers-fantasy/?hvid=17LjJu) is based on the quarterback/receiver ADP relationship to find undervalued players in fantasy football drafts.
 
+![qb_rec_adp](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/qb_rec_adp_2016_2.png)
+
 A higher drafted quarterback, presumably, will throw for more yards and touchdowns than one drafted lower. Receivers are the ones catching the ball and accumulating those yards, touchdowns and fantasy points. By analyzing the relationship between our assessments of a team’s quarterback and receivers, we can see which part of the equation is undervalued versus the other.
 
 There are a few adjustments that make this formula work:
@@ -19,3 +21,5 @@ There are a few adjustments that make this formula work:
 4) Quarterback rushing production is also accounted for by discounting the receiver value calculation by the percentage of quarterback fantasy points from rushing, not throwing.
 
 If you assume that quarterbacks are generally more fairly valued than receivers according to ADP, a team below the relationship trendline has receivers that are undervalued, and should be a great landing spot for a rookie wide receiver.
+
+![rookie_wr_os](https://github.com/colekev/Opportunity-Scores-for-Rookie-WRs/blob/master/rook_wr_os_2016_3.png)
